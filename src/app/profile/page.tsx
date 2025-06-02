@@ -3,7 +3,7 @@
 import axios from "axios"
 import Link from "next/link";
 import { useRouter } from "next/navigation"
-import { useState } from "react";
+import React , { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 
@@ -28,12 +28,16 @@ export default function ProfilePage() {
         try {
             const res = await axios.get('/api/users/user');
             console.log(res.data);
-            setData(res.data.data);
+            setData(res.data.data._id);
         } catch (error:any) {
             toast.error("Failed to fetch user details: " + error.message);
             console.log(error.message);
         }
     };
+
+    useEffect(() => {
+        getUserDetails();
+    }, []);
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen py-2">
@@ -41,7 +45,7 @@ export default function ProfilePage() {
             <hr/>
             <div className="my-5 text-center">
                 <p>profile page</p>
-                <h2>{data === "nothing" ? "Nothing in the data" : <Link href={`/profile/${data}`}>{data}</Link>}</h2>
+                <h2 className="bg-green-600 text-white rounded p-5 py-1 mt-3">{data === "nothing" ? "Nothing in the data" : <Link href={`/profile/${data}`}>{data}</Link>}</h2>
                 <button onClick={getUserDetails} className="bg-blue-600 text-white rounded-2xl p-5 py-1 mt-3">get data</button>
             </div>
             <button onClick={logout} className="bg-red-600 text-white rounded-2xl p-5 py-1">Logout</button>

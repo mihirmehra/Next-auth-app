@@ -30,26 +30,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Toaster/>
-        <div className="nav-section">
-          <div className="container">
-            <div className="row">
-              <div className="col-md-6">
-                  <div className="nav-links">
-                    <ul>
-                      <li><Link href="/">home</Link></li>
-                      <li><Link href="/login">login</Link></li>
-                      <li><Link href="/signup">signup</Link></li>
-                      <li><Link href="/profile">profile</Link></li>
-                    </ul>
-                  </div>
-              </div>  
-              <div className="col-md-6">
-
-              </div>
-            </div>
-          </div>
-        </div>
-
         {children}
       </body>
     </html>
