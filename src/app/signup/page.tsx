@@ -42,7 +42,7 @@ export default function SignupPage() {
         setButtonDisabled(false);
       }
       else {
-        setButtonDisabled(true)
+        setButtonDisabled(true);
       }
     },[user]);
 

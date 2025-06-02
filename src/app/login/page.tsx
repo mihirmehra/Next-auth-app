@@ -2,7 +2,7 @@
 import Link from "next/link";
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast/headless";
+import toast from "react-hot-toast";
 import axios from "axios";
 
 
