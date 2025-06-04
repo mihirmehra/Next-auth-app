@@ -16,8 +16,8 @@ export async function POST(request: NextRequest) {
         console.log(newPassword)
 
         const user = await User.findOne({
-            forgotPasswordToken: token,
-            forgotPasswordTokenExpiry: { $gt: Date.now() }
+            forgetPasswordToken: token,
+            forgetPasswordTokenExpiry: { $gt: Date.now() }
         });
 
         if (!user) {
@@ -27,8 +27,8 @@ export async function POST(request: NextRequest) {
         console.log("User found:", user);
 
         user.password = await bcrypt.hash(newPassword, 10);
-        user.forgotPasswordToken = undefined;
-        user.forgotPasswordTokenExpiry = undefined;
+        user.forgetPasswordToken = undefined;
+        user.forgetPasswordTokenExpiry = undefined;
         await user.save();
 
         return NextResponse.json({ message: "Password reset successfully", success: true }, { status: 200 });
