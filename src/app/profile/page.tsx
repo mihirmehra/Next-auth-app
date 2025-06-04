@@ -28,7 +28,7 @@ export default function ProfilePage() {
         try {
             const res = await axios.get('/api/users/user');
             console.log(res.data);
-            setData(res.data.data._id);
+            setData(res.data.data.email);
         } catch (error:any) {
             toast.error("Failed to fetch user details: " + error.message);
             console.log(error.message);
@@ -46,7 +46,7 @@ export default function ProfilePage() {
             <div className="my-5 text-center">
                 <p>profile page</p>
                 <h2 className="bg-green-600 text-white rounded p-5 py-1 mt-3">{data === "nothing" ? "Nothing in the data" : <Link href={`/profile/${data}`}>{data}</Link>}</h2>
-                <button onClick={getUserDetails} className="bg-blue-600 text-white rounded-2xl p-5 py-1 mt-3">get data</button>
+                <button onClick={getUserDetails} className="bg-blue-600 text-white rounded-2xl p-5 py-1 mt-3">Go to Profile</button>
             </div>
             <button onClick={logout} className="bg-red-600 text-white rounded-2xl p-5 py-1">Logout</button>
        </div>

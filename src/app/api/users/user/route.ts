@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
             message: "User found",
             data: user
         });
-
+        
     } catch (error: any) {
         console.error("Error fetching user data:", error.message);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
