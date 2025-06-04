@@ -6,39 +6,127 @@ import toast from "react-hot-toast";
 
 
 export default function UserProfile() {
-
     interface UserData {
         email: string;
+        bio: string;
         username: string;
+        dateOfBirth: string;
+        nationality: string;
+        languages: string;
+        currentPosition: string;
+        workExperience: string;
+        education: string;
+        skills: string;
+        aboutYou: string;
+        professionalGoals: string;
+        phoneNumber: number;
+        location: string;
+    }
+
+    interface AchivementData {
+        title: string,
+        description: string,
     }
 
     const [data, setData] = useState<UserData | null>(null);
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState("personal");
+    const [isEditing, setIsEditing] = useState(false);
+    const [achievementData, setAchievementData] = useState<AchivementData[]>([]);
+    const [achievementTitle, setAchievementTitle] = useState("");
+    const [achievementDescription, setAchievementDescription] = useState("");
+    
 
     const getUserDetails = async () => {
         try {
             const res = await axios.get('/api/users/user');
-            console.log(res.data)
-            console.log(res.data.data)
+            console.log(res.data.data);
             setData(res.data.data);
-        } catch (error:any) {
+        } catch (error: any) {
             toast.error("Failed to fetch user details: " + error.message);
-            console.log(error.message);
         }
     };
 
+    const getAchivementDetails = async () => {
+        try {
+            const res = await axios.get('/api/achivements/achivement');
+            const data = await res.data;
+            console.log(data.data);
+            setAchievementData(data.data);
+        } catch (error:any) {
+            console.log("Failed to fetch achivement details: " +error.message)
+        }
+    }
+
+
     useEffect(() => {
         getUserDetails();
+        getAchivementDetails();
     }, []);
 
-    const email = loading ? "Loading..." : data?.email || "Email not available";
-    const username = loading ? "Loading..." : data?.username || "Email not available";
-
-    // Function to handle tab switching
     const handleTabClick = (tab: string) => {
         setActiveTab(tab);
     };
+
+    const handleSaveChanges = async () => {
+        if (!data) return;
+
+        const updatedData = {
+            username: (document.getElementById("editName") as HTMLInputElement).value,
+            bio: (document.getElementById("editBio") as HTMLInputElement).value,
+            dateOfBirth: (document.getElementById("editDateOfBirth") as HTMLInputElement).value,
+            nationality: (document.getElementById("editNationality") as HTMLInputElement).value,
+            languages: (document.getElementById("editLanguages") as HTMLInputElement).value,
+            currentPosition: (document.getElementById("editCurrentPosition") as HTMLInputElement).value,
+            workExperience: (document.getElementById("editWorkExperience") as HTMLInputElement).value,
+            education: (document.getElementById("editEducation") as HTMLInputElement).value,
+            skills: (document.getElementById("editSkills") as HTMLInputElement).value,
+            aboutYou: (document.getElementById("editAboutYou") as HTMLTextAreaElement).value,
+            professionalGoals: (document.getElementById("editProfessionalGoals") as HTMLTextAreaElement).value,
+            phoneNumber: (document.getElementById("editPhoneNumber") as HTMLTextAreaElement).value,
+            location: (document.getElementById("editLocation") as HTMLTextAreaElement).value,
+        };
+
+        try {
+            const response = await axios.put('/api/users/user', updatedData);
+            setData(response.data.data);
+            toast.success("Profile updated successfully!");
+            setIsEditing(false);
+        } catch (error: any) {
+            toast.error("Failed to update profile: " + error.message);
+        }
+    };
+
+    const handleModalActive = () => {
+        const modal = document.getElementById("achievementModal");
+        modal?.classList.toggle("hidden");
+        modal?.classList.toggle("flex");
+    };
+
+    const handleAddAchievement = async () => {
+        if (!achievementTitle || !achievementDescription) {
+            toast.error("Please fill in all fields.");
+            return;
+        }
+    
+        const newAchievement = {
+            user: data,
+            title: achievementTitle,
+            description: achievementDescription,
+            date: Date.now(),
+        };
+    
+        try {
+            const response = await axios.post('/api/achivements/achivement', newAchievement);
+            toast.success("Achievement added successfully!");
+            setAchievementTitle(""); 
+            setAchievementDescription("");
+            handleModalActive();
+        } catch (error: any) {
+            toast.error("Failed to add achievement: " + error.message);
+        }
+    };
+    
 
     return (
 
@@ -54,30 +142,56 @@ export default function UserProfile() {
                         />
                     </div>
                     <h1 className="text-2xl font-bold text-gray-800 mb-2">
-                        {username}
+                        {data?.username}
                     </h1>
-                    <p className="text-gray-600 text-center max-w-md mb-6">
-                        Product Designer &amp; UX Specialist with 6+ years of experience
-                        creating intuitive digital experiences for global brands.
-                    </p>
-                    <div className="flex flex-wrap justify-center gap-4 mb-2">
+                    <div>
+                        {isEditing ? (
+                            <input
+                                type="text"
+                                id="editBio"
+                                className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary"
+                                defaultValue={data?.bio}
+                            />
+                        ) : (
+                            <span>{data?.bio}</span>
+                        )}
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-3 mb-2 mt-5">
                         <div className="flex items-center gap-2 text-gray-700">
                             <div className="w-5 h-5 flex items-center justify-center text-primary">
                                 <i className="ri-mail-line" />
                             </div>
-                            <span>{email}</span>
+                            <span>{data?.email}</span>
                         </div>
                         <div className="flex items-center gap-2 text-gray-700">
                             <div className="w-5 h-5 flex items-center justify-center text-primary">
                                 <i className="ri-phone-line" />
                             </div>
-                            <span>+1 (415) 555-0123</span>
+                            {isEditing ? (
+                                <input
+                                    type="number"
+                                    id="editPhoneNumber"
+                                    className="w-[200px] px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary"
+                                    defaultValue={data?.phoneNumber}
+                                />
+                            ) : (
+                                <span>{data?.phoneNumber}</span>
+                            )}
                         </div>
                         <div className="flex items-center gap-2 text-gray-700">
                             <div className="w-5 h-5 flex items-center justify-center text-primary">
                                 <i className="ri-map-pin-line" />
                             </div>
-                            <span>San Francisco, CA</span>
+                            {isEditing ? (
+                                <input
+                                    type="text"
+                                    id="editLocation"
+                                    className="w-[200px] px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary"
+                                    defaultValue={data?.location}
+                                />
+                            ) : (
+                                <span>{data?.location}</span>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -85,21 +199,21 @@ export default function UserProfile() {
                 <div className="border-b border-gray-200 mb-6">
                     <div className="flex space-x-8">
                         <button
-                            className={`tab-button py-3 px-1 border-b-2 ${activeTab === "personal" ? "border-primary text-primary" : "border-transparent text-gray-500"} font-medium`}
+                            className={`tab py-3 px-1 border-b-2 ${activeTab === "personal" ? "border-primary text-primary" : "border-transparent text-gray-500"} font-medium`}
                             onClick={() => handleTabClick("personal")}
                             data-tab="personal"
                         >
                             Personal Details
                         </button>
                         <button
-                            className={`tab-button py-3 px-1 border-b-2 ${activeTab === "achievements" ? "border-primary text-primary" : "border-transparent text-gray-500"} font-medium`}
+                            className={`tab py-3 px-1 border-b-2 ${activeTab === "achievements" ? "border-primary text-primary" : "border-transparent text-gray-500"} font-medium`}
                             onClick={() => handleTabClick("achievements")}
                             data-tab="achievements"
                         >
                             Achievements
                         </button>
                         <button
-                            className={`tab-button py-3 px-1 border-b-2 ${activeTab === "social" ? "border-primary text-primary" : "border-transparent text-gray-500"} font-medium`}
+                            className={`tab py-3 px-1 border-b-2 ${activeTab === "social" ? "border-primary text-primary" : "border-transparent text-gray-500"} font-medium`}
                             onClick={() => handleTabClick("social")}
                             data-tab="social"
                         >
@@ -111,149 +225,224 @@ export default function UserProfile() {
                 <div className="tab-content-container">
                     {activeTab === "personal" && (
                         <div id="personal" className="tab-content active">
+                            <div className="flex justify-end mb-4">
+                                <button
+                                    id="editProfileBtn"
+                                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary hover:bg-gray-50 rounded"
+                                    onClick={() => setIsEditing(!isEditing)}
+                                >
+                                    <i className="ri-edit-line" />
+                                    <span>{isEditing ? "Cancel" : "Edit Profile"}</span>
+                                </button>
+                            </div>
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <div className="text-sm font-medium text-gray-500">Full Name</div>
-                                    <div className="text-gray-800">Alexandra Marie Richardson</div>
+                                    {isEditing ? (
+                                        <input
+                                            type="text"
+                                            id="editName"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary"
+                                            defaultValue={data?.username}
+                                        />
+                                    ) : (
+                                        <div className="text-gray-800" id="displayName">
+                                            {data?.username}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="space-y-2">
-                                    <div className="text-sm font-medium text-gray-500">
-                                        Date of Birth
-                                    </div>
-                                    <div className="text-gray-800">March 15, 1989</div>
+                                    <div className="text-sm font-medium text-gray-500">Date of Birth</div>
+                                    {isEditing ? (
+                                        <input
+                                            type="date"
+                                            id="editDateOfBirth"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary"
+                                            defaultValue={data?.dateOfBirth}
+                                        />
+                                    ) : (
+                                        <div className="text-gray-800" id="displayDateOfBirth">
+                                            {data?.dateOfBirth}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="space-y-2">
                                     <div className="text-sm font-medium text-gray-500">Nationality</div>
-                                    <div className="text-gray-800">American</div>
+                                    {isEditing ? (
+                                        <input
+                                            type="text"
+                                            id="editNationality"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary"
+                                            defaultValue={data?.nationality}
+                                        />
+                                    ) : (
+                                        <div className="text-gray-800" id="displayNationality">
+                                            {data?.nationality}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="space-y-2">
                                     <div className="text-sm font-medium text-gray-500">Languages</div>
-                                    <div className="text-gray-800">
-                                        English (Native), Spanish (Fluent), French (Basic)
-                                    </div>
+                                    {isEditing ? (
+                                        <input
+                                            type="text"
+                                            id="editLanguages"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary"
+                                            defaultValue={data?.languages}
+                                        />
+                                    ) : (
+                                        <div className="text-gray-800" id="displayLanguages">
+                                            {data?.languages}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="space-y-2">
-                                    <div className="text-sm font-medium text-gray-500">
-                                        Current Position
-                                    </div>
-                                    <div className="text-gray-800">
-                                        Senior Product Designer at InnovateTech
-                                    </div>
+                                    <div className="text-sm font-medium text-gray-500">Current CurrentPosition</div>
+                                    {isEditing ? (
+                                        <input
+                                            type="text"
+                                            id="editCurrentPosition"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary"
+                                            defaultValue={data?.currentPosition}
+                                        />
+                                    ) : (
+                                        <div className="text-gray-800" id="displayCurrentPosition">
+                                            {data?.currentPosition}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="space-y-2">
-                                    <div className="text-sm font-medium text-gray-500">
-                                        Work Experience
-                                    </div>
-                                    <div className="text-gray-800">6+ years</div>
+                                    <div className="text-sm font-medium text-gray-500">Work WorkExperience</div>
+                                    {isEditing ? (
+                                        <input
+                                            type="text"
+                                            id="editWorkExperience"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary"
+                                            defaultValue={data?.workExperience}
+                                        />
+                                    ) : (
+                                        <div className="text-gray-800" id="displayWorkExperience">
+                                            {data?.workExperience}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="space-y-2">
                                     <div className="text-sm font-medium text-gray-500">Education</div>
-                                    <div className="text-gray-800">
-                                        M.A. Human-Computer Interaction, Stanford University
-                                    </div>
+                                    {isEditing ? (
+                                        <input
+                                            type="text"
+                                            id="editEducation"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary"
+                                            defaultValue={data?.education}
+                                        />
+                                    ) : (
+                                        <div className="text-gray-800" id="displayEducation">
+                                            {data?.education}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="space-y-2">
                                     <div className="text-sm font-medium text-gray-500">Skills</div>
-                                    <div className="text-gray-800">
-                                        UX/UI Design, User Research, Prototyping, Design Systems
-                                    </div>
+                                    {isEditing ? (
+                                        <input
+                                            type="text"
+                                            id="editSkills"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary"
+                                            defaultValue={data?.skills}
+                                        />
+                                    ) : (
+                                        <div className="text-gray-800" id="displaySkills">
+                                            {data?.skills}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
+
                             <div className="mt-8 space-y-4">
                                 <div className="space-y-2">
-                                    <div className="text-sm font-medium text-gray-500">About Me</div>
-                                    <div className="text-gray-800">
-                                        <p>
-                                            I'm a passionate product designer focused on creating
-                                            human-centered digital experiences that solve real problems.
-                                            With a background in both design and psychology, I bring a
-                                            unique perspective to understanding user needs and translating
-                                            them into intuitive interfaces.
-                                        </p>
-                                        <p className="mt-2">
-                                            When I'm not designing, you can find me hiking in the mountains,
-                                            experimenting with new cooking recipes, or mentoring aspiring
-                                            designers through online communities.
-                                        </p>
-                                    </div>
+                                    <div className="text-sm font-medium text-gray-500">AboutYou Me</div>
+                                    {isEditing ? (
+                                        <textarea
+                                            id="editAboutYou"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary"
+                                            rows={6}
+                                            defaultValue={data?.aboutYou}
+                                        />
+                                    ) : (
+                                        <div className="text-gray-800" id="displayAboutYou">
+                                            <p>{data?.aboutYou}</p>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="space-y-2">
-                                    <div className="text-sm font-medium text-gray-500">
-                                        Professional Goals
-                                    </div>
-                                    <div className="text-gray-800">
-                                        <p>
-                                            I aim to lead design teams that create products with meaningful
-                                            impact, while continuing to advocate for accessible and
-                                            inclusive design practices across the industry.
-                                        </p>
-                                    </div>
+                                    <div className="text-sm font-medium text-gray-500">Professional ProfessionalGoals</div>
+                                    {isEditing ? (
+                                        <textarea
+                                            id="editProfessionalGoals"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary"
+                                            rows={3}
+                                            defaultValue={data?.professionalGoals}
+                                        />
+                                    ) : (
+                                        <div className="text-gray-800" id="displayProfessionalGoals">
+                                            <p>{data?.professionalGoals}</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
+
+                            {isEditing && (
+                                <div className="mt-6 flex justify-end gap-3">
+                                    <button
+                                        id="cancelEdit"
+                                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
+                                        onClick={() => setIsEditing(false)}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        id="saveProfile"
+                                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-600/90"
+                                        onClick={handleSaveChanges}
+                                    >
+                                        Save Changes
+                                    </button>
+                                </div>
+                            )}
                         </div>
+
                     )}
                     {activeTab === "achievements" && (
                         <div id="achievements" className="tab-content">
+                            <div className="flex justify-end mb-4">
+                                <button id="addAchievementBtn"
+                                    onClick={handleModalActive}
+                                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary hover:bg-gray-50 rounded">
+                                    <i className="ri-add-line"></i>
+                                    <span>Add Achievement</span>
+                                </button>
+                            </div>
                             <div className="space-y-6">
-                                <div className="p-4 bg-gray-50 rounded-lg">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="font-medium text-gray-900">
-                                            Design Innovation Award
-                                        </h3>
-                                        <span className="text-sm text-gray-500">2024</span>
-                                    </div>
-                                    <p className="text-gray-700">
-                                        Received industry recognition for pioneering a new approach to
-                                        financial app interfaces that increased user engagement by 42%.
-                                    </p>
-                                </div>
-                                <div className="p-4 bg-gray-50 rounded-lg">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="font-medium text-gray-900">
-                                            Published Research Paper
-                                        </h3>
-                                        <span className="text-sm text-gray-500">2023</span>
-                                    </div>
-                                    <p className="text-gray-700">
-                                        Co-authored "Designing for Cognitive Accessibility" in the Journal
-                                        of Human-Computer Interaction, cited by over 200 researchers.
-                                    </p>
-                                </div>
-                                <div className="p-4 bg-gray-50 rounded-lg">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="font-medium text-gray-900">
-                                            Speaker at UX Conference
-                                        </h3>
-                                        <span className="text-sm text-gray-500">2022</span>
-                                    </div>
-                                    <p className="text-gray-700">
-                                        Delivered keynote presentation on "The Future of Inclusive Design"
-                                        at the International UX Design Summit in Berlin.
-                                    </p>
-                                </div>
-                                <div className="p-4 bg-gray-50 rounded-lg">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="font-medium text-gray-900">Design Patent</h3>
-                                        <span className="text-sm text-gray-500">2021</span>
-                                    </div>
-                                    <p className="text-gray-700">
-                                        Secured patent for innovative navigation system designed for users
-                                        with motor impairments, now implemented in multiple healthcare
-                                        applications.
-                                    </p>
-                                </div>
-                                <div className="p-4 bg-gray-50 rounded-lg">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="font-medium text-gray-900">
-                                            Team Leadership Award
-                                        </h3>
-                                        <span className="text-sm text-gray-500">2020</span>
-                                    </div>
-                                    <p className="text-gray-700">
-                                        Recognized for exceptional leadership in guiding cross-functional
-                                        team through complete redesign of company's flagship product.
-                                    </p>
-                                </div>
+                                {achievementData.length > 0 ? (
+                                    achievementData.map((achievement, index) => (
+                                        <div key={index} className="p-4 bg-gray-50 rounded-lg">
+                                            <div  className="mb-4">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <h3 className="font-medium text-gray-900">
+                                                        {achievement.title}
+                                                    </h3>
+                                                    <span className="text-sm text-gray-500">2024</span>
+                                                </div>
+                                                <p className="text-gray-700">
+                                                    {achievement.description}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p>No achievements found.</p>
+                                )}
+                            
                             </div>
                         </div>
                     )}
@@ -382,7 +571,7 @@ export default function UserProfile() {
                                     </div>
                                     <button
                                         type="submit"
-                                        className="px-6 py-2 bg-primary text-white font-medium rounded-button hover:bg-primary/90 transition-colors whitespace-nowrap"
+                                        className="px-6 py-2 bg-blue-600 text-white font-medium rounded hover:bg-blue-600/90 transition-colors whitespace-nowrap"
                                     >
                                         Send Message
                                     </button>
@@ -392,6 +581,80 @@ export default function UserProfile() {
                     )}
                 </div>
             </div>
+
+            <div
+                id="achievementModal"
+                className="hidden fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50"
+            >
+                <div className="bg-white rounded-lg w-full max-w-lg mx-4">
+                    <div className="flex justify-between items-center p-6 border-b">
+                        <h3 className="text-xl font-semibold text-gray-900">
+                            Add New Achievement
+                        </h3>
+                        <button
+                            id="closeAchievementModal"
+                            onClick={handleModalActive}
+                            className="text-gray-500 hover:text-gray-700"
+                        >
+                            <div className="w-6 h-6 flex items-center justify-center">
+                                <i className="ri-close-line ri-lg" />
+                            </div>
+                        </button>
+                    </div>
+                    <form id="achievementForm" className="p-6">
+                        <div className="space-y-4">
+                            <div>
+                                <label
+                                    htmlFor="achievementTitle"
+                                    className="block text-sm font-medium text-gray-700 mb-1"
+                                >
+                                    Achievement Title
+                                </label>
+                                <input
+                                    type="text"
+                                    id="achievementTitle"
+                                    value={achievementTitle}
+                                    onChange={(e) => setAchievementTitle(e.target.value)}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                                />
+                            </div>
+                            <div>
+                                <label
+                                    htmlFor="achievementDescription"
+                                    className="block text-sm font-medium text-gray-700 mb-1"
+                                >
+                                    Description
+                                </label>
+                                <textarea
+                                    id="achievementDescription"
+                                    rows={4}
+                                    value={achievementDescription}
+                                    onChange={(e) => setAchievementDescription(e.target.value)}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                                />
+                            </div>
+                        </div>
+                        <div className="mt-6 flex justify-end gap-3">
+                            <button
+                                type="button"
+                                id="cancelAchievement"
+                                onClick={handleModalActive}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                onClick={handleAddAchievement}
+                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-600/90"
+                            >
+                                Save Achievement
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
         </div>
 
     );

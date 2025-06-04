@@ -17,55 +17,55 @@ const userSchema = new mongoose.Schema({
     },
     name: {
         type: String,
-        default: "Anonymous", // Default value for name
+        default: "Anonymous",
     },
     phoneNumber: {
-        type: String,
-        default: "Not Provided", // Default value for phone number
+        type: Number,
+        default: "Not Provided",
     },
     location: {
         type: String,
-        default: "Not Specified", // Default value for location
+        default: "Not Specified",
     },
     dateOfBirth: {
         type: Date,
-        default: null, // Default value for date of birth
+        default: null, 
     },
     nationality: {
         type: String,
-        default: "Not Specified", // Default value for nationality
+        default: "Not Specified",
     },
     languages: {
         type: [String],
-        default: [], // Default value for languages (empty array)
+        default: [], 
     },
     currentPosition: {
         type: String,
-        default: "Unemployed", // Default value for current position
+        default: "Unemployed", 
     },
     workExperience: {
         type: String,
-        default: "No Experience", // Default value for work experience
+        default: "No Experience",
     },
     education: {
         type: String,
-        default: "Not Specified", // Default value for education
+        default: "Not Specified",
     },
     skills: {
         type: [String],
-        default: [], // Default value for skills (empty array)
+        default: [], 
     },
     bio: {
         type: String,
-        default: "No bio provided.", // Default value for bio
+        default: "No bio provided.", 
     },
     aboutYou: {
         type: String,
-        default: "Tell us about yourself.", // Default value for about you
+        default: "Tell us about yourself.", 
     },
     professionalGoals: {
         type: String,
-        default: "No goals specified.", // Default value for professional goals
+        default: "No goals specified.", 
     },
     isVerified: {
         type: Boolean,
