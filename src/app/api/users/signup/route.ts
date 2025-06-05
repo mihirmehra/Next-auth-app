@@ -12,7 +12,24 @@ connect()
 export async function POST(request: NextRequest) {
     try{
         const reqBody = await request.json()
-        const {username, email, password} = reqBody
+        const {
+            username, 
+            email, 
+            password,
+            name,
+            phoneNumber,
+            location,
+            dateOfBirth,
+            nationality,
+            languages,
+            currentPosition,
+            workExperience,
+            education,
+            skills,
+            bio,
+            aboutYou,
+            professionalGoals,
+        } = reqBody
         
         console.log(reqBody);
 
@@ -32,6 +49,19 @@ export async function POST(request: NextRequest) {
         const newUser = new User({
             username,
             email,
+            name,
+            phoneNumber,
+            location,
+            dateOfBirth,
+            nationality,
+            languages,
+            currentPosition,
+            workExperience,
+            education,
+            skills,
+            bio,
+            aboutYou,
+            professionalGoals,
             password: hashedPassword
         });
 

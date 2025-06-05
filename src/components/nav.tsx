@@ -9,6 +9,7 @@ import { useUser } from '@/context/userContext';
 
 const Nav = () => {
     const router = useRouter();
+    // const [userEmail, setUserEmail] = useState<string | null>(null);
     const { userEmail, setUserEmail } = useUser();
 
     
@@ -23,6 +24,18 @@ const Nav = () => {
             console.log(error.message);
         }
     };
+    
+    const getUserDetails = async () => {
+        const res = await axios.get('/api/users/user');
+        console.log(res.data);
+        setUserEmail(res.data.data.email); 
+    };
+
+    useEffect(() => {
+        if(window.location.pathname !== '/login' && window.location.pathname !== '/signup'){
+            getUserDetails();
+        }   
+    },[])
 
 
     return (

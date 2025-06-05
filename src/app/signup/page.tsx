@@ -12,6 +12,18 @@ export default function SignupPage() {
     email: "",
     password: "",
     username: "",
+    phoneNumber: "",
+    location: "",
+    dateOfBirth: "",
+    nationality: "",
+    languages: "",
+    currentPosition: "",
+    workExperience: "",
+    education: "",
+    skills: "",
+    bio: "",
+    aboutYou: "",
+    professionalGoals: "",
   })
 
   const [buttonDisabled, setButtonDisabled] = React.useState(false);
