@@ -4,9 +4,11 @@ import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import axios from "axios";
+import { useUser } from '@/context/userContext';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { userEmail, setUserEmail } = useUser();
   const [user, setUser] = React.useState({
     email: "",
     password: "",
@@ -14,7 +16,6 @@ export default function LoginPage() {
 
   const [buttonDisabled, setButtonDisabled] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-
 
   const onLogin = async (event: any) => {
     event.preventDefault();
@@ -24,6 +25,8 @@ export default function LoginPage() {
       const res = await axios.post("/api/users/login", user);
       console.log("Login success", res.data);
       toast.success("Login successfull");
+      await getUserDetails();
+      setUserEmail(res.data.user.email);
       
       const userId = await res.data.user.username;
       router.push(`/profile/${userId}`);
@@ -38,6 +41,17 @@ export default function LoginPage() {
     }
 
   }
+
+  const getUserDetails = async () => {
+    try {
+        const res = await axios.get('/api/users/user');
+        console.log(res.data);
+        setUserEmail(res.data.data.email); 
+    } catch (error: any) {
+        toast.error("Failed to fetch user details: " + error.message);
+        console.log(error.message);
+    }
+};
 
   useEffect(() => {
     if (user.email.length > 0 && user.password.length > 0) {
