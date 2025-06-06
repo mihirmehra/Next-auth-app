@@ -1,42 +1,17 @@
 "use client";
 
-import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { useUser } from '@/context/userContext';
+import { useUser } from '@/context/userContext'; 
 
 const Nav = () => {
     const router = useRouter();
-    // const [userEmail, setUserEmail] = useState<string | null>(null);
-    const { userEmail, setUserEmail } = useUser();
+    const { userEmail, logout } = useUser(); 
 
-    
-    const logout = async () => {
-        try {
-            await axios.get("/api/users/logout");
-            toast.success("Logout Successfully");
-            setUserEmail(null); 
-            router.push("/login");
-        } catch (error: any) {
-            toast.error("There was an error logging out: " + error.message);
-            console.log(error.message);
-        }
+    const handleLogout = async () => {
+        await logout(); 
+        router.push("/login"); 
     };
-    
-    const getUserDetails = async () => {
-        const res = await axios.get('/api/users/user');
-        console.log(res.data);
-        setUserEmail(res.data.data.email); 
-    };
-
-    useEffect(() => {
-        if(window.location.pathname !== '/login' && window.location.pathname !== '/signup'){
-            getUserDetails();
-        }   
-    },[])
-
 
     return (
         <nav className="bg-white shadow-sm">
@@ -51,9 +26,9 @@ const Nav = () => {
                         {userEmail ? (
                             <>
                                 <span className="text-gray-600 px-3 py-2 rounded-md text-sm font-medium">
-                                    {userEmail} 
+                                    {userEmail}
                                 </span>
-                                <button onClick={logout} className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                                <button onClick={handleLogout} className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
                                     Logout
                                 </button>
                             </>
